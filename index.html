@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Archives Epstein</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #0f0f14, #050507);
+      color: #9ca3af;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    header {
+      padding: 30px;
+      border-bottom: 1px solid #1f1f1f;
+    }
+
+    header h1 {
+      margin: 0;
+      letter-spacing: 4px;
+      color: #7a0c0c;
+      font-size: 18px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 60px 20px 40px;
+    }
+
+    .hero img {
+      width: 220px;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 50%;
+      filter: grayscale(100%);
+      border: 1px solid #2a2a2a;
+    }
+
+    .hero h2 {
+      margin-top: 25px;
+      font-size: 26px;
+      letter-spacing: 6px;
+      color: #7a0c0c;
+    }
+
+    .enter-btn {
+      margin-top: 30px;
+      padding: 12px 26px;
+      border: 1px solid #7a0c0c;
+      background: transparent;
+      color: #7a0c0c;
+      letter-spacing: 3px;
+      cursor: pointer;
+    }
+
+    .archives {
+      display: none;
+      padding: 30px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .filters button {
+      background: transparent;
+      border: 1px solid #2a2a2a;
+      color: #9ca3af;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 11px;
+      letter-spacing: 2px;
+    }
+
+    .filters button.active {
+      background: #7a0c0c;
+      color: #050507;
+      border-color: #7a0c0c;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .photo-card {
+      border: 1px solid #1f1f1f;
+      background: #050505;
+      cursor: pointer;
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      filter: grayscale(100%);
+    }
+
+    .photo-info {
+      padding: 10px;
+      font-size: 12px;
+    }
+
+    .photo-info span {
+      color: #7a0c0c;
+      letter-spacing: 3px;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>ARCHIVES DOCUMENTAIRES</h1>
+</header>
+
+<section class="hero">
+  <img src="photos/epstein.jpg" alt="Jeffrey Epstein">
+  <h2>JEFFREY EPSTEIN</h2>
+  <button class="enter-btn" onclick="enterArchives()">ENTRER DANS LES ARCHIVES</button>
+</section>
+
+<section class="archives" id="archives">
+  <div class="filters">
+    <button onclick="toggleFilter('personne')">PERSONNES</button>
+    <button onclick="toggleFilter('lieu')">LIEUX</button>
+    <button onclick="toggleFilter('vol')">VOLS</button>
+    <button onclick="toggleFilter('document')">DOCUMENTS</button>
+    <button onclick="toggleFilter('finance')">FINANCES</button>
+    <button onclick="toggleFilter('temoignage')">TÉMOIGNAGES</button>
+    <button onclick="toggleFilter('chronologie')">CHRONOLOGIE</button>
+    <button onclick="toggleFilter('correspondance')">CORRESPONDANCE</button>
+    <button onclick="toggleFilter('photo')">PHOTOS</button>
+    <button onclick="resetFilters()">RÉINITIALISER</button>
+  </div>
+
+  <div class="grid" id="photoGrid"></div>
+</section>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightboxImg">
+</div>
+
+<script>
+  const photos = [
+    { src: "photos/photo1.jpg", tags: ["personne", "photo"] },
+    { src: "photos/photo2.jpg", tags: ["lieu", "document"] },
+    { src: "photos/photo3.jpg", tags: ["vol", "chronologie"] }
+  ];
+
+  let activeFilters = [];
+
+  const grid = document.getElementById("photoGrid");
+  const lightbox = document.getElementById("lightbox");
+  const lightboxImg = document.getElementById("lightboxImg");
+
+  function renderPhotos() {
+    grid.innerHTML = "";
+    photos.forEach((photo, index) => {
+      if (activeFilters.length === 0 || activeFilters.every(f => photo.tags.includes(f))) {
+        const card = document.createElement("div");
+        card.className = "photo-card";
+        card.innerHTML = `
+          <img src="${photo.src}">
+          <div class="photo-info">
+            <span>PHOTO-${String(index + 1).padStart(4, "0")}</span>
+          </div>
+        `;
+        card.onclick = () => openLightbox(photo.src);
+        grid.appendChild(card);
+      }
+    });
+  }
+
+  function toggleFilter(filter) {
+    const i = activeFilters.indexOf(filter);
+    i > -1 ? activeFilters.splice(i, 1) : activeFilters.push(filter);
+    renderPhotos();
+  }
+
+  function resetFilters() {
+    activeFilters = [];
+    renderPhotos();
+  }
+
+  function enterArchives() {
+    document.getElementById("archives").style.display = "block";
+    renderPhotos();
+    window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
+  }
+
+  function openLightbox(src) {
+    lightboxImg.src = src;
+    lightbox.style.display = "flex";
+  }
+
+  function closeLightbox() {
+    lightbox.style.display = "none";
+  }
+</script>
+
+</body>
+</html>
